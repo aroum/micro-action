@@ -5,6 +5,13 @@
   "Tags": ["action", "run", "execute", "fzf", "F5"],
   "Versions": [
     {
+      "Version": "0.1.1",
+      "Url": "https://github.com/aroum/micro-action/archive/refs/tags/v0.1.1.zip",
+      "Require": {
+        "micro": ">=2.0.0"
+      }
+    },
+    {
       "Version": "0.1.0",
       "Url": "https://github.com/aroum/micro-action/archive/refs/tags/v0.1.0.zip",
       "Require": {

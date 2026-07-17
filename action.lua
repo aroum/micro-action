@@ -241,9 +241,17 @@ function runAction(bp, label, action)
         end
     end
 
+    local isWindows = (package.config:sub(1,1) == "\\")
+
     if runSilent then
         micro.InfoBar():Message("Running " .. label .. " (silent)...")
-        local output, err = shell.RunCommand(cmd)
+        local shellCmd
+        if isWindows then
+            shellCmd = 'cmd /c "' .. cmd:gsub('"', '\\"') .. '"'
+        else
+            shellCmd = "bash -c '" .. cmd:gsub("'", "'\\''") .. "'"
+        end
+        local output, err = shell.RunCommand(shellCmd)
         if err ~= nil then
             micro.InfoBar():Error("Failed " .. label .. ": " .. (output or "") .. " (" .. tostring(err) .. ")")
         else
@@ -252,8 +260,13 @@ function runAction(bp, label, action)
     elseif runInBuiltinTerm then
         micro.InfoBar():Message("Running " .. label .. " in terminal: " .. cmd)
         bp:HandleCommand("hsplit")
-        local escapedCmd = cmd:gsub("'", "'\\''")
-        bp:HandleCommand("term '" .. escapedCmd .. "'")
+        if isWindows then
+            local escapedCmd = cmd:gsub('"', '\\"')
+            bp:HandleCommand('term cmd /c "' .. escapedCmd .. '"')
+        else
+            local escapedCmd = cmd:gsub("'", "'\\''")
+            bp:HandleCommand("term bash -c '" .. escapedCmd .. "'")
+        end
     else
         micro.InfoBar():Message("Running " .. label .. ": " .. cmd)
         shell.RunInteractiveShell(cmd, true, false)
