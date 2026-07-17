@@ -1,41 +1,12 @@
 [{
-  "Name": "runit",
-  "Description": "Press F5 to save and run, F12 to make, F9 to make in background.",
-  "Website": "https://github.com/terokarvinen/micro-run",
-  "Tags": ["run", "execute", "Go", "Python", "Bash", "Lua", "F5"],
-  "License": "MIT license",
+  "Name": "action",
+  "Description": "Enhanced action plugin with configurable per-filetype and per-file action tables, fzf selection, and placeholder support.",
+  "Website": "https://github.com/aroum/micro-action",
+  "Tags": ["action", "run", "execute", "fzf", "F5"],
   "Versions": [
     {
-      "Version": "0.0.8",
-      "Url": "https://github.com/terokarvinen/micro-run/archive/v0.0.8.zip",
-      "Require": {
-        "micro": ">=2.0.0"
-      }
-    },
-    {
-      "Version": "0.0.7",
-      "Url": "https://github.com/terokarvinen/micro-run/archive/v0.0.7.zip",
-      "Require": {
-        "micro": ">=2.0.0"
-      }
-    },
-    {
-      "Version": "0.0.6",
-      "Url": "https://github.com/terokarvinen/micro-run/archive/v0.0.6.zip",
-      "Require": {
-        "micro": ">=2.0.0"
-      }
-    },
-    {
-      "Version": "0.0.5",
-      "Url": "https://github.com/terokarvinen/micro-run/archive/v0.0.5.zip",
-      "Require": {
-        "micro": ">=2.0.0"
-      }
-    },
-    {
-      "Version": "0.0.4",
-      "Url": "https://github.com/terokarvinen/micro-run/archive/v0.0.4.zip",
+      "Version": "0.1.0",
+      "Url": "https://github.com/aroum/micro-action/archive/refs/tags/v0.1.0.zip",
       "Require": {
         "micro": ">=2.0.0"
       }

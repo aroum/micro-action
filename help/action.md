@@ -1,64 +1,6 @@
-# action plugin for micro editor
+# Action Plugin Help
 
 The `action` plugin allows you to save and execute commands (runners, debuggers, formatters) depending on the active buffer's filetype or absolute path. It supports interactive selection via FZF, customizable parameters per action, file placeholders, silent background execution, and running commands in an embedded terminal split.
-
-![demo](pisc/micro-run.png)
-
-## Key Features
-
-### 1. Context-Aware Runner Configurations
-* **Filetype Actions:** Define a list of commands specific to filetypes (e.g., run Python, build Go, lint JavaScript) under `"action-filetypes"`.
-* **Per-File Overrides:** Define file-specific overrides or extensions under `"action-files"` based on absolute path matching or wildcards (glob patterns).
-
-### 2. Flexible Shell Execution Modes
-* **Interactive Terminal Split:** Run commands in an embedded terminal emulator split horizontally at the bottom (`runInBuiltinTerm`), keeping you in the editor context.
-* **Silent Background Execution:** Execute tasks silently in the background (`runSilent`). If a command fails, the error output is shown on the InfoBar; if it succeeds, a notification is displayed.
-* **Standard Interactive Shell:** Run interactive tools directly in the system shell (default fallback).
-
-### 3. Automated Editor Workflows
-* **Save Before Run:** Automatically saves the active buffer before running the command (`saveBeforeRun`), ensuring your latest changes are always built or executed.
-* **Reload After Run:** Automatically reloads the buffer from disk after the command exits (`reloadAfterRun`). This is perfect for formatters/linter auto-fixes (e.g., `ruff`, `prettier`, `goimports`).
-* **Trigger on Save:** Automatically executes actions when saving the buffer (`runOnSave`).
-
-### 4. Dynamic Path Placeholders
-Use the following placeholders inside command strings for dynamic path substitution:
-* `{file}`: Absolute path to the current file (e.g., `/home/user/project/main.py`).
-* `{stem}`: Filename without its extension (e.g., `main`).
-* `{dir}`: Directory containing the current file (e.g., `/home/user/project`).
-
-### 5. Smart "Rerun Last" Target
-* The `actionlast` command remembers the last selected command to rerun it instantly (e.g., bound to `F5`). Direct runs via hotkey bindings or command lines do not update this rerun target, allowing you to rerun your primary task while running other actions manually.
-
-### 6. FZF Session Persistence
-* **Stay Open:** Set the global option `actionFzfStay` to `true` to keep the FZF menu open after running a command, allowing you to execute multiple commands in sequence.
-
-## Installation
-
-Add the repository `repo.json` link to your `settings.json` file:
-
-```json
-"pluginrepos": [
-    "https://raw.githubusercontent.com/aroum/micro-action/main/repo.json"
-]
-```
-
-Then install the plugin by running:
-
-```bash
-> plugin install action
-```
-
-To view the help page inside the editor, run:
-
-```bash
-> help action
-```
-
-### Dependencies
-
-This plugin requires or integrates with the following tools:
-
-* **`fzf`** (Mandatory): Required for selecting and searching configured actions.
 
 ## Commands & Keybindings
 
@@ -152,3 +94,25 @@ Each action configured under `"action-filetypes"` or `"action-files"` is defined
 ```
 
 * **`mode`**: `"extend"` (merges/overwrites matching keys) or `"override"` (ignores all filetype actions, using only these file-specific actions).
+
+## Key Features
+
+### 1. Context-Aware Runner Configurations
+* **Filetype Actions:** Define a list of commands specific to filetypes (e.g., run Python, build Go, lint JavaScript) under `"action-filetypes"`.
+* **Per-File Overrides:** Define file-specific overrides or extensions under `"action-files"` based on absolute path matching or wildcards (glob patterns).
+
+### 2. Flexible Shell Execution Modes
+* **Interactive Terminal Split:** Run commands in an embedded terminal emulator split horizontally at the bottom (`runInBuiltinTerm`), keeping you in the editor context.
+* **Silent Background Execution:** Execute tasks silently in the background (`runSilent`). If a command fails, the error output is shown on the InfoBar; if it succeeds, a notification is displayed.
+* **Standard Interactive Shell:** Run interactive tools directly in the system shell (default fallback).
+
+### 3. Automated Editor Workflows
+* **Save Before Run:** Automatically saves the active buffer before running the command (`saveBeforeRun`), ensuring your latest changes are always built or executed.
+* **Reload After Run:** Automatically reloads the buffer from disk after the command exits (`reloadAfterRun`). This is perfect for formatters/linter auto-fixes (e.g., `ruff`, `prettier`, `goimports`).
+* **Trigger on Save:** Automatically executes actions when saving the buffer (`runOnSave`).
+
+### 4. Dynamic Path Placeholders
+Use the following placeholders inside command strings for dynamic path substitution:
+* `{file}`: Absolute path to the current file (e.g., `/home/user/project/main.py`).
+* `{stem}`: Filename without its extension (e.g., `main`).
+* `{dir}`: Directory containing the current file (e.g., `/home/user/project`).
