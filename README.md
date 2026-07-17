@@ -2,7 +2,9 @@
 
 The `action` plugin allows you to save and execute commands (runners, debuggers, formatters) depending on the active buffer's filetype or absolute path. It supports interactive selection via FZF, customizable parameters per action, file placeholders, silent background execution, and running commands in an embedded terminal split.
 
-![demo](pisc/micro-run.png)
+![banner](pisc/banner.png)
+
+---
 
 ## Key Features
 
