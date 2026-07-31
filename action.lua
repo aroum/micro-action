@@ -2,7 +2,6 @@ local config = import("micro/config")
 local shell = import("micro/shell")
 local micro = import("micro")
 local filepath = import("path/filepath")
-local os = import("os")
 
 local stateFile = config.ConfigDir .. "/action-state.json"
 local runningOnSave = false
@@ -103,7 +102,10 @@ local function parseSimpleJson(str)
     local tbl = {}
     if not str then return tbl end
     for k, v in string.gmatch(str, '"([^"]+)"%s*:%s*"([^"]+)"') do
-        tbl[k] = v
+        -- Unescape backslashes and quotes
+        local unescapedV = v:gsub('\\"', '"'):gsub('\\\\', '\\')
+        local unescapedK = k:gsub('\\"', '"'):gsub('\\\\', '\\')
+        tbl[unescapedK] = unescapedV
     end
     return tbl
 end
@@ -111,7 +113,9 @@ end
 local function formatSimpleJson(tbl)
     local parts = {}
     for k, v in pairs(tbl) do
-        table.insert(parts, string.format('  "%s": "%s"', k, v))
+        local escapedV = v:gsub("\\", "\\\\"):gsub('"', '\\"')
+        local escapedK = k:gsub("\\", "\\\\"):gsub('"', '\\"')
+        table.insert(parts, string.format('  "%s": "%s"', escapedK, escapedV))
     end
     return "{\n" .. table.concat(parts, ",\n") .. "\n}"
 end
@@ -184,9 +188,9 @@ end
 
 function applyPlaceholders(cmd, placeholders)
     local newCmd = cmd
-    newCmd = string.gsub(newCmd, "{file}", function() return placeholders.file end)
-    newCmd = string.gsub(newCmd, "{stem}", function() return placeholders.stem end)
-    newCmd = string.gsub(newCmd, "{dir}", function() return placeholders.dir end)
+    newCmd = newCmd:gsub("{file}", placeholders.file:gsub("%%", "%%%%"))
+    newCmd = newCmd:gsub("{stem}", placeholders.stem:gsub("%%", "%%%%"))
+    newCmd = newCmd:gsub("{dir}", placeholders.dir:gsub("%%", "%%%%"))
     return newCmd
 end
 
@@ -234,24 +238,16 @@ function runAction(bp, label, action)
 
     if not runSilent then
         if type(action) ~= "table" or action.runInBuiltinTerm == nil then
-            local globalTerm = config.GetGlobalOption("actionRunInBuiltinTerm")
+            local globalTerm = config.GetGlobalOption("action-term")
             if globalTerm ~= nil then
                 runInBuiltinTerm = globalTerm
             end
         end
     end
 
-    local isWindows = (package.config:sub(1,1) == "\\")
-
     if runSilent then
         micro.InfoBar():Message("Running " .. label .. " (silent)...")
-        local shellCmd
-        if isWindows then
-            shellCmd = 'cmd /c "' .. cmd:gsub('"', '\\"') .. '"'
-        else
-            shellCmd = "bash -c '" .. cmd:gsub("'", "'\\''") .. "'"
-        end
-        local output, err = shell.RunCommand(shellCmd)
+        local output, err = shell.RunCommand(cmd)
         if err ~= nil then
             micro.InfoBar():Error("Failed " .. label .. ": " .. (output or "") .. " (" .. tostring(err) .. ")")
         else
@@ -260,12 +256,12 @@ function runAction(bp, label, action)
     elseif runInBuiltinTerm then
         micro.InfoBar():Message("Running " .. label .. " in terminal: " .. cmd)
         bp:HandleCommand("hsplit")
+        local isWindows = (package.config:sub(1, 1) == "\\")
         if isWindows then
-            local escapedCmd = cmd:gsub('"', '\\"')
-            bp:HandleCommand('term cmd /c "' .. escapedCmd .. '"')
+            bp:HandleCommand('term "' .. cmd:gsub('"', '\\"') .. '"')
         else
             local escapedCmd = cmd:gsub("'", "'\\''")
-            bp:HandleCommand("term bash -c '" .. escapedCmd .. "'")
+            bp:HandleCommand("term '" .. escapedCmd .. "'")
         end
     else
         micro.InfoBar():Message("Running " .. label .. ": " .. cmd)
@@ -296,11 +292,18 @@ function actionPick(bp)
         return
     end
 
-    local stay = config.GetGlobalOption("actionFzfStay")
+    local stay = config.GetGlobalOption("action-fzf-stay")
     if stay == nil then stay = false end
 
     local fzfCmd = config.GetGlobalOption("fzfcmd") or "fzf"
-    local tempPath = "/tmp/action_input"
+    local isWindows = (package.config:sub(1, 1) == "\\")
+    local tempPath
+    if isWindows then
+        local tempDir = os.getenv("TEMP") or os.getenv("TMP") or config.ConfigDir
+        tempPath = tempDir .. "\\action_input"
+    else
+        tempPath = "/tmp/action_input"
+    end
 
     repeat
         local input = table.concat(labels, "\n")
@@ -314,10 +317,16 @@ function actionPick(bp)
             break
         end
         
-        local runCmd = "sh -c '" .. fzfCmd .. " < " .. tempPath .. "'"
-        local output, err = shell.RunInteractiveShell(runCmd, false, true)
+        local runCmd
+        if isWindows then
+            runCmd = 'cmd.exe /c "' .. fzfCmd .. ' < "' .. tempPath .. '""'
+        else
+            runCmd = "sh -c '" .. fzfCmd .. " < " .. tempPath .. "'"
+        end
         
-        os.Remove(tempPath)
+        local output, err = shell.RunInteractiveShell(runCmd, true, true)
+        
+        os.remove(tempPath)
 
         if err ~= nil or not output or output == "" then
             break
